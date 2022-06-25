@@ -17,6 +17,7 @@ namespace DiscordBot.commands
     public class DebugCommandModule : BaseCommandModule
     {
 
+
         [Command("modules"), Hidden, RequireOwner]
         public async Task ModuleInfo(CommandContext ctx) 
         {

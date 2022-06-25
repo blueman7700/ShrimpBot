@@ -55,9 +55,15 @@ namespace DiscordBot.commands
         [Description("Sets the channel where server updates will be posted.")]
         public async Task RegisterChannel(CommandContext ctx)
         {
-            registeredChannels.Add(ctx.Channel);
-            await ctx.RespondAsync($"channel \"{ctx.Channel.Name}\" successfully registered!");
-            
+            if (!registeredChannels.Contains(ctx.Channel))
+            {
+                registeredChannels.Add(ctx.Channel);
+                await ctx.RespondAsync($"channel \"{ctx.Channel.Name}\" successfully registered!");
+            }
+            else
+            {
+                await ctx.RespondAsync("Channel already registered!");
+            }
         }
 
         [Command("unregister")]
@@ -85,7 +91,7 @@ namespace DiscordBot.commands
         {
             discordClient = ctx.Client;
             await UpdateIP();
-            await PrintServerInfo(true);
+            await PrintServerInfo(true, ctx);
         }
 
         /// <summary>
@@ -175,8 +181,9 @@ namespace DiscordBot.commands
         /// </summary>
         /// <param name="force"></param>
         /// <returns></returns>
-        private static async Task PrintServerInfo(bool force = false)
+        private static async Task PrintServerInfo(bool force = false, CommandContext? ctx = null)
         {
+            //ensure that the discordClient is set
             if (discordClient == null)
             {
                 return;
@@ -206,15 +213,23 @@ namespace DiscordBot.commands
                 {
                     if (e.Id == "btn_copy_address")
                     {
-                        await e.Interaction.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredMessageUpdate);
+                        await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                         await ClipboardService.SetTextAsync($"{ip}:25565");
                     }
 
                 };
 
-                foreach (var ch in registeredChannels)
+                //if a CommandContext is passed then just send the message to the associated channel, otherwise notify all.
+                if (ctx != null)
                 {
-                    await ch.SendMessageAsync(mBuilder);
+                    await ctx.Channel.SendMessageAsync(mBuilder);
+                }
+                else
+                {
+                    foreach (var ch in registeredChannels)
+                    {
+                        await ch.SendMessageAsync(mBuilder);
+                    }
                 }
             }
         }

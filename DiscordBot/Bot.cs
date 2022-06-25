@@ -53,7 +53,7 @@ namespace DiscordBot
 
             //cheeky bit of dependency injection
             /*var services = new ServiceCollection()
-                .AddScoped<DiscordClient>(discord)
+                .AddSingleton<Bot>(this)
                 .BuildServiceProvider();*/
 
             Console.WriteLine("[info] Loading command modules...");
